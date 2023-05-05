@@ -1,0 +1,31 @@
+{
+    "name": "ildark/laravel-queue-rpc",
+    "description": "Rpc support for rabbitmq",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ildar K",
+            "email": "ildarkot685@gmail.com"
+        }
+    ],
+    "require": {
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^13.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "IldarK\\LaravelQueueRpc\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "main"
+        },
+        "laravel": {
+            "providers": [
+                "IldarK\\LaravelQueueRpc\\Providers\\LaravelQueueRpcServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "devr",
+    "prefer-stable": true
+}
