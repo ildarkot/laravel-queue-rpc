@@ -65,10 +65,10 @@ class RpcMQJob extends RabbitMQJob
         $this->getRabbitMQ()->getChannel()->basic_publish($message, routing_key: $this->message->get('reply_to'));
     }
 
-    private function prepareResponseData(RpcResponse|JsonResource|array $response): string
+    private function prepareResponseData(RpcResponse|JsonResource|array|null $response): string
     {
-        if (is_array($response)) {
-            return json_encode($response ?: null, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (is_array($response) || !$response) {
+            $response = RpcResponse::success($response);
         }
 
         if ($response instanceof JsonResource) {
