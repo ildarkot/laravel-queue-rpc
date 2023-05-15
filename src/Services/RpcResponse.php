@@ -77,4 +77,9 @@ class RpcResponse
     {
         return $this->data;
     }
+
+    public function hasData(): bool
+    {
+        return !empty($this->data);
+    }
 }
