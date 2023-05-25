@@ -66,6 +66,43 @@ class RpcService
         return RpcResponse::parse(json_decode($response, true));
     }
 
+    public function fanout(
+        string $exchange,
+        string $routingKey,
+        array $data,
+        int $timeout = 5,
+    ): void
+    {
+        $connection = $this->makeConnection();
+        $channel = $connection->channel();
+
+        $channel->exchange_declare(
+            exchange: $exchange,
+            type: 'fanout',
+            durable: true,
+            auto_delete: false
+        );
+
+        $msg = new AMQPMessage(
+            json_encode([
+                'payload' => $data
+            ]),
+            [
+                'delivery_mode' => 1,
+            ]
+        );
+
+        $channel->basic_publish(
+            $msg,
+            $exchange,
+            $routingKey,
+            true
+        );
+
+        $channel->close();
+        $connection->close();
+    }
+
     /**
      * @throws Exception
      */
