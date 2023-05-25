@@ -68,9 +68,7 @@ class RpcService
 
     public function fanout(
         string $exchange,
-        string $routingKey,
         array $data,
-        int $timeout = 5,
     ): void
     {
         $connection = $this->makeConnection();
@@ -95,7 +93,7 @@ class RpcService
         $channel->basic_publish(
             $msg,
             $exchange,
-            $routingKey,
+            '',
             true
         );
 
