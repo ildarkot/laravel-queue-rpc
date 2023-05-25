@@ -69,7 +69,7 @@ class RpcService
     /**
      * @throws Exception
      */
-    public function initExchanges(): void
+    public function initDirectExchanges(): void
     {
         $connections = collect(config('queue.connections'))
             ->filter(fn($item, $key) => Str::startsWith($key, config('queue.connections.rabbitmq.service_exchange')));
@@ -93,29 +93,29 @@ class RpcService
         $channel->close();
     }
 
-    public function initExchange($connectionName): void
+    public function initFanoutExchanges(): void
     {
-        $config = collect(config('queue.connections'))->get($connectionName);
+        $fanouts = config('queue.connections.rabbitmq.fanouts', []);
 
-        if (!$config) {
-            throw new RuntimeException('queue configuration not found');
+        if (!count($fanouts)) {
+            return;
         }
 
         $connection = $this->makeConnection();
         $channel = $connection->channel();
 
-        $queueOptions = $config['options']['queue'];
+        foreach ($fanouts as $fanout) {
+            $channel->exchange_declare(
+                exchange: $fanout,
+                type: 'fanout',
+                durable: true,
+                auto_delete: false
+            );
+        }
 
-        $channel->exchange_declare(
-            exchange: $queueOptions['exchange'],
-            type: $queueOptions['exchange_type'],
-            durable: true,
-            auto_delete: false
-        );
-        $channel->queue_declare(queue: $queueOptions['exchange_routing_key'], durable: true, auto_delete: false);
-        $channel->queue_bind($config['queue'], $queueOptions['exchange'], $queueOptions['exchange_routing_key']);
         $channel->close();
     }
+
     /**
      * @throws Exception
      */

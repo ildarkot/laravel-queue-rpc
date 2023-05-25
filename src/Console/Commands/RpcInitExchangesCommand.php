@@ -33,6 +33,7 @@ class RpcInitExchangesCommand extends Command
      */
     public function handle()
     {
-        $this->rpcService->initExchanges();
+        $this->rpcService->initDirectExchanges();
+        $this->rpcService->initFanoutExchanges();
     }
 }
