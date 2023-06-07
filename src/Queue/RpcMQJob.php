@@ -47,22 +47,29 @@ class RpcMQJob extends RabbitMQJob
             $response = RpcResponse::serverError($exception->getMessage());
         }
 
-        if ($this->message->has('correlation_id') && $this->message->has('reply_to')) {
-            $this->publish($this->prepareResponseData($response));
-        }
-
-        $this->delete();
+        $this->publish($this->prepareResponseData($response));
     }
 
     private function publish(string $response)
     {
-        $message = new AMQPMessage($response, [
-            'content_type' => 'application/json;charset=utf-8',
-            'delivery_mode' => 1,
-            'correlation_id' => $this->message->get('correlation_id')
-        ]);
+        try {
+            if ($this->message->has('reply_to')) {
+                $properties = [
+                    'content_type' => 'application/json;charset=utf-8',
+                    'delivery_mode' => 1,
+                ];
+                if ($this->message->has('correlation_id')) {
+                    $properties['correlation_id'] = $this->message->get('correlation_id');
+                }
 
-        $this->getRabbitMQ()->getChannel()->basic_publish($message, routing_key: $this->message->get('reply_to'));
+                $message = new AMQPMessage($response, $properties);
+
+                $channel = $this->getRabbitMQ()->getChannel();
+                $channel->basic_publish($message, routing_key: $this->message->get('reply_to'));
+            }
+        } finally {
+            $this->delete();
+        }
     }
 
     private function prepareResponseData(RpcResponse|JsonResource|array|null $response): string

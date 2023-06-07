@@ -13,7 +13,7 @@ class RpcService
     /**
      * @throws Exception
      */
-    public function exchange(string $exchange, string $routingKey, array $data, int $timeout = 5): RpcResponse
+    public function exchange(string $exchange, string $routingKey, array $data, int $timeout = 50): RpcResponse
     {
         $response = null;
         $correlationId = Str::uuid()->toString();
